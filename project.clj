@@ -4,4 +4,5 @@
   :license {:name "Built In Project License"
             :url  "https://github.com/source-c/clj-mqtt-broker/LICENSE"}
   :main clj-mqtt-broker.core
-  :dependencies [[io.moquette/moquette-broker "0.15"]])
+  :dependencies [[io.moquette/moquette-broker "0.15"
+                  :exclusions [com.bugsnag/bugsnag]]])
