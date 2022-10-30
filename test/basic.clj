@@ -23,8 +23,12 @@
           (.stop srv)
           true))
     (is (let [srv (Broker. (SimpleBroker.))]
-          (start srv (BasicHandler. "1234"))
-          (send srv "FROM" "TO" "TEST" 0 false)
-          (Thread/sleep 20000)
+          (start srv (BasicHandler. "5678"))
           (stop srv)
+          true))
+    (is (with-open [srv (Broker. (SimpleBroker.))]
+          (start srv (BasicHandler. "9012"))
+          (Thread/sleep 20000)
+          (send srv "FROM" "/TEMPERATURE" "TEST" 0 false)
+          (Thread/sleep 20000)
           true))))

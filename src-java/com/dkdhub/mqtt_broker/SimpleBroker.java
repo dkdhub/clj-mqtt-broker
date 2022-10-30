@@ -12,10 +12,8 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
-public class SimpleBroker {
+public class SimpleBroker implements IBroker {
     final Server mqttBroker = new Server();
     final IConfig classPathConfig;
 
@@ -24,6 +22,7 @@ public class SimpleBroker {
         classPathConfig = new ResourceLoaderConfig(classpathLoader, "moquette.conf");
     }
 
+    @Override
     public void start(InterceptHandler handler) throws IOException {
 //        List<? extends InterceptHandler> userHandlers = Collections.singletonList(handler);
 
@@ -32,12 +31,14 @@ public class SimpleBroker {
         System.out.println("Broker started");
     }
 
+    @Override
     public void stop() {
         System.out.println("Stopping broker");
         mqttBroker.stopServer();
         System.out.println("Broker stopped");
     }
 
+    @Override
     public void send(String from, String topic, byte[] data, MqttQoS qos, Boolean retained) {
         MqttPublishMessage message = MqttMessageBuilders.publish()
                 .topicName(topic)
