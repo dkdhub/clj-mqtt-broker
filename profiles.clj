@@ -8,9 +8,7 @@
                            [org.slf4j/jul-to-slf4j "1.7.36"]
                            [org.slf4j/jcl-over-slf4j "1.7.36"]
                            [org.slf4j/log4j-over-slf4j "1.7.36"]
-                           [org.clojure/tools.logging "1.2.4"]]
-
-            :plugins       []}
+                           [org.clojure/tools.logging "1.2.4"]]}
 
  :provided {:dependencies      [[org.clojure/clojure "1.11.1"]]
             :source-paths      #{"src-clj"}
@@ -19,6 +17,6 @@
 
             :javac-options     ["-source" "9" "-target" "9" "-g:none"]
 
-            :jar-exclusions    [#"\.java"]}
+            :jar-exclusions    [#"\.java", #"^moquette.conf$"]}
 
  :jar      {:aot :all}}

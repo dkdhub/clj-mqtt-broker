@@ -10,6 +10,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -17,9 +19,11 @@ public class SimpleBroker implements IBroker {
     final Server mqttBroker = new Server();
     final IConfig classPathConfig;
 
-    public SimpleBroker() {
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleBroker.class);
+
+    public SimpleBroker(final String configName) {
         IResourceLoader classpathLoader = new ClasspathResourceLoader();
-        classPathConfig = new ResourceLoaderConfig(classpathLoader, "moquette.conf");
+        classPathConfig = new ResourceLoaderConfig(classpathLoader, configName);
     }
 
     @Override
@@ -28,14 +32,14 @@ public class SimpleBroker implements IBroker {
 
         mqttBroker.startServer(classPathConfig);
         mqttBroker.addInterceptHandler(handler);
-        System.out.println("Broker started");
+        LOG.info("SimpleBroker started. Class Path config = {}.", classPathConfig);
     }
 
     @Override
     public void stop() {
-        System.out.println("Stopping broker");
+        LOG.info("Stopping SimpleBroker");
         mqttBroker.stopServer();
-        System.out.println("Broker stopped");
+        LOG.info("SimpleBroker stopped");
     }
 
     @Override
@@ -47,7 +51,7 @@ public class SimpleBroker implements IBroker {
                 .payload(Unpooled.copiedBuffer(data))
                 .build();
 
-        System.out.println("Sending message " + new String(data) + " from " + from + " to " + topic + " with " + qos + " and " + retained);
+        LOG.debug("Sending message {} from {} to {} with {} and {}", new String(data), from, topic, qos, retained);
 
         mqttBroker.internalPublish(message, from);
     }
