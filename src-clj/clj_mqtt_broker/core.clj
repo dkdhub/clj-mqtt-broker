@@ -19,14 +19,15 @@
 
 (deftype Broker [^IBroker instance]
   CljBroker
-  (start [_ handlers] (.start ^IBroker instance handlers))
-  (open [_ handlers] (.start ^IBroker instance handlers))
-  (stop [_] (.stop ^IBroker instance))
-  (close [_] (.stop ^IBroker instance))
-  (send [_ from to data qos retain?]
+  (start [this handlers] (.start ^IBroker instance handlers) this)
+  (open [this handlers] (.start ^IBroker instance handlers) this)
+  (stop [this] (.stop ^IBroker instance) this)
+  (close [this] (.stop ^IBroker instance) this)
+  (send [this from to data qos retain?]
     (.send ^IBroker instance
            (if (string? from) from (name from))
            (if (string? to) to (name to))
            (if (bytes? data) data (.getBytes data))
            (if (keyword? qos) (->QoS qos) (MqttQoS/valueOf (int qos)))
-           (if (boolean? retain?) retain? false))))
+           (if (boolean? retain?) retain? false))
+           this))

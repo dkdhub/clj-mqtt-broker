@@ -20,18 +20,34 @@
 
 (deftest check-constructs
   (testing "Checking basic constructs"
+    
+    (log/info "--------- instance? -------------")
     (is (instance? InterceptHandler (BasicHandler. "1234")))
+    
+    (log/info "--------- Java interface ---------")
     (is (let [srv (SimpleBroker. config-name)]
           (.start srv (BasicHandler. "1234"))
           (.stop srv)
           true))
+    
+    (log/info "--------- Clojure interface [start/stop] ---------")
     (is (let [srv (Broker. (SimpleBroker. config-name))]
           (start srv (BasicHandler. "5678"))
           (stop srv)
           true))
+    
+    (log/info "--------- Clojure interface [with-open + start] ---------")
     (is (with-open [srv (Broker. (SimpleBroker. config-name))]
           (start srv (BasicHandler. "9012"))
-          (Thread/sleep 20000)
+          (Thread/sleep 10000)
           (send srv "FROM" "/TEMPERATURE" "TEST" 0 false)
-          (Thread/sleep 20000)
-          true))))
+          (Thread/sleep 10000)
+          true))
+          
+    (log/info "--------- Clojure interface [with-open + open] ---------")
+    (is (let [b (Broker. (SimpleBroker. config-name))]
+          (with-open [srv (open b (BasicHandler. "3456"))]
+            (Thread/sleep 10000)
+            (send srv "FROM" "/TEMPERATURE" "TEST" 1 false)
+            (Thread/sleep 10000))
+            true))))
