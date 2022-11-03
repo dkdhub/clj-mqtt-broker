@@ -6,17 +6,21 @@ Unfortunately there are few to nothing libraries natively suitable to be used in
 
 The Moquette library is Java MQTT broker based on an eventing model with Netty. The library has a good performance and is desegned with embedding support out of the box. Its configuration is compatible with well known Mosquitto Open Source MQTT server.
 
-Being combained together there and empowered by Clojure - these tools open the way to painless M2M communications for services written in Clojure.
+When being combined - these tools open the way to painless M2M communications for services written in Clojure.
+
+As always we prefer to have things tiny and as simple as possible.
 
 == Compatibility
 
-The following implementations are successfully passes production tests:
+The following implementations are successfully passed production tests:
 
 - Moquette
 - Mosquitto
 - Paho
 - MQTT.js
 - DKD/Brownie
+
+any other tool that conform MQTT specs should pass too, we believe.
 
 == Usage
 
@@ -25,7 +29,7 @@ The usage pattern is simple:
 - define handlers
 - create broker instance
 - start the service
-- serve messages
+- start serve messages
 
 === Defining handlers
 
@@ -42,7 +46,7 @@ The handlers record should implement `InterceptHandler` interface
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 ----
 
-The full set of method to be overrided:
+The full set of method to be overridden:
 
 . onPublish
 . onConnect
@@ -58,9 +62,9 @@ The `ALL_MESSAGE_TYPES` vector contains the whole bunch of the related messages 
 
 === Creating instance
 
-The library contains default `SimpleBroker` implementation written in Java that requires resources' configuration file name to be passed into construtor.
+The library contains default `SimpleBroker` implementation written in Java that requires resources' configuration file name to be passed into constructor.
 
-In order to manage the instance itnshould be passed as a parameter into the Clojure record implements `CljBroker` interface.
+In order to manage the instance comfortably it should be passed as a parameter into the Clojure record implements `CljBroker` interface.
 
 .CljBroker interface definition
 [source, clojure]
@@ -84,10 +88,10 @@ so the instantiation of the complete Broker is looks like:
 
 === Starting the service
 
-The clojure interface support two approaches:
+The Clojure interface supports two approaches:
 
-. controling the instance by calling `start`/`stop` methods (that fully corresponds to its Java interface)
-. controling the instance by `with-open` macro
+. controlling the instance by calling `start`/`stop` methods (that fully corresponds to its Java interface)
+. controlling the instance by `with-open` macro
 
 .start/stop
 [source,clojure]
