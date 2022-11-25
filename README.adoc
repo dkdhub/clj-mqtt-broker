@@ -12,7 +12,7 @@ As always we prefer to have things tiny and as simple as possible.
 
 == Compatibility
 
-The following implementations are successfully passed production tests:
+The following implementations are successfully passed compatibility tests:
 
 - Moquette
 - Mosquitto
