@@ -3,11 +3,11 @@
             :target-path   "target/%s"
             :clean-targets ^{:protect false} [:target-path]
 
-            :dependencies [[ch.qos.logback/logback-classic "1.2.11"
+            :dependencies [[ch.qos.logback/logback-classic "1.4.5"
                             :exclusions [org.slf4j/slf4j-api]]
-                           [org.slf4j/jul-to-slf4j "1.7.36"]
-                           [org.slf4j/jcl-over-slf4j "1.7.36"]
-                           [org.slf4j/log4j-over-slf4j "1.7.36"]
+                           [org.slf4j/jul-to-slf4j "2.0.5"]
+                           [org.slf4j/jcl-over-slf4j "2.0.5"]
+                           [org.slf4j/log4j-over-slf4j "2.0.5"]
                            [org.clojure/tools.logging "1.2.4"]]}
 
  :provided {:dependencies      [[org.clojure/clojure "1.11.1"]]
