@@ -7,7 +7,8 @@
 (defn ->QoS [qos]
   (get {:atleast MqttQoS/AT_LEAST_ONCE
         :atmost  MqttQoS/AT_MOST_ONCE
-        :exactly MqttQoS/EXACTLY_ONCE} qos
+        :exactly MqttQoS/EXACTLY_ONCE
+        :failure MqttQoS/FAILURE} qos
        MqttQoS/EXACTLY_ONCE))
 
 (defprotocol CljBroker
