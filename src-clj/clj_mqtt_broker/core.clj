@@ -28,7 +28,7 @@
     (.send ^IBroker instance
            (if (string? from) from (name from))
            (if (string? to) to (name to))
-           (if (bytes? data) data (.getBytes data))
+           (if (bytes? data) data (.getBytes ^String data))
            (if (keyword? qos) (->QoS qos) (MqttQoS/valueOf (int qos)))
            (if (boolean? retain?) retain? false))
            this))

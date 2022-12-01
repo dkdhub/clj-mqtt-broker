@@ -3,4 +3,6 @@
   :url "https://github.com/dkdhub/clj-mqtt-broker"
   :license {:name "Built In Project License"}
   :dependencies [[io.moquette/moquette-broker "0.15"
-                  :exclusions [com.bugsnag/bugsnag]]])
+                  :exclusions [com.bugsnag/bugsnag
+                               org.slf4j/slf4j-api
+                               org.slf4j/slf4j-log4j12]]])
