@@ -1,6 +1,5 @@
 package com.dkdhub.mqtt_broker;
 
-import io.moquette.broker.ClientDescriptor;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -17,13 +16,13 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Broker implements IBroker {
+public class AdvancedBroker implements IBroker {
 
     final Server m_server;
     final IConfig m_config;
-    private static final Logger LOG = LoggerFactory.getLogger(Broker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdvancedBroker.class);
 
-    public Broker(Properties config) {
+    public AdvancedBroker(Properties config) {
         LOG.info("Constructing MQTT Broker with configuration {}", config);
         this.m_config = new MemoryConfig(config);
         this.m_server = new Server();
