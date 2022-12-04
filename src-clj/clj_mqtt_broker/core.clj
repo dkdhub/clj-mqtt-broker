@@ -14,23 +14,25 @@
        MqttQoS/EXACTLY_ONCE))
 
 (def default-message-size-bytes BrokerConstants/DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE)
-(defn mqtt-config [{:keys [port-tcp port-ws host passwords-path anonymous? ws-path
-                           persistence-type message-size]
-                    :or   {port-tcp "disabled" port-ws "disabled" host "0.0.0.0" passwords-path "" anonymous? false ws-path "/"}
-                    :as   props}]
-  (doto (Properties.)
-    (.putAll (Hashtable. ^Map (cond-> {BrokerConstants/PORT_PROPERTY_NAME            (str port-tcp)
-                                       BrokerConstants/WEB_SOCKET_PORT_PROPERTY_NAME (str port-ws)
-                                       BrokerConstants/HOST_PROPERTY_NAME            (str host)
-                                       BrokerConstants/PASSWORD_FILE_PROPERTY_NAME   (str passwords-path)
-                                       BrokerConstants/ALLOW_ANONYMOUS_PROPERTY_NAME (str (Boolean/parseBoolean (str anonymous?)))
-                                       BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME (str ws-path)}
+(defn mqtt-config
+  ([] (mqtt-config nil))
+  ([{:keys [port-tcp port-ws host passwords-path anonymous? ws-path
+            persistence-type message-size]
+     :or   {port-tcp "disabled" port-ws "disabled" host "0.0.0.0" passwords-path "" anonymous? false ws-path "/"}
+     :as   props}]
+   (doto (Properties.)
+     (.putAll (Hashtable. ^Map (cond-> {BrokerConstants/PORT_PROPERTY_NAME            (str port-tcp)
+                                        BrokerConstants/WEB_SOCKET_PORT_PROPERTY_NAME (str port-ws)
+                                        BrokerConstants/HOST_PROPERTY_NAME            (str host)
+                                        BrokerConstants/PASSWORD_FILE_PROPERTY_NAME   (str passwords-path)
+                                        BrokerConstants/ALLOW_ANONYMOUS_PROPERTY_NAME (str (Boolean/parseBoolean (str anonymous?)))
+                                        BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME (str ws-path)}
 
-                                      (and (:persistence-type props) (= :h2 persistence-type))
-                                      (assoc BrokerConstants/PERSISTENT_STORE_PROPERTY_NAME BrokerConstants/DEFAULT_PERSISTENT_PATH)
+                                       (and (:persistence-type props) (= :h2 persistence-type))
+                                       (assoc BrokerConstants/PERSISTENT_STORE_PROPERTY_NAME BrokerConstants/DEFAULT_PERSISTENT_PATH)
 
-                                      (:message-size props)
-                                      (assoc BrokerConstants/NETTY_MAX_BYTES_PROPERTY_NAME (str default-message-size-bytes)))))))
+                                       (:message-size props)
+                                       (assoc BrokerConstants/NETTY_MAX_BYTES_PROPERTY_NAME (str message-size))))))))
 
 (defprotocol CljBroker
   (start [o ^InterceptHandler handlers])
