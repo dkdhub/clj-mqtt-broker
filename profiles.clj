@@ -10,7 +10,8 @@
                            [org.slf4j/log4j-over-slf4j "2.0.5"]
                            [org.clojure/tools.logging "1.2.4"]]}
 
- :provided {:dependencies      [[org.clojure/clojure "1.11.1"]]
+ :provided {:dependencies      [[org.clojure/clojure "1.11.1"]
+                                [org.slf4j/log4j-over-slf4j "2.0.5"]]
             :source-paths      #{"src-clj"}
             :java-source-paths #{"src-java"}
             :resource-paths    ["resources"]
