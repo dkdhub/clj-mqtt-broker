@@ -14,7 +14,7 @@
        MqttQoS/EXACTLY_ONCE))
 
 (def default-message-size-bytes BrokerConstants/DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE)
-(defn mqtt-config
+(defn mqtt-config ^Properties
   ([] (mqtt-config nil))
   ([{:keys [port-tcp port-ws host passwords-path anonymous? ws-path
             persistence-type message-size]
