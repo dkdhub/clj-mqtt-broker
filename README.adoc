@@ -1,14 +1,19 @@
 = MQTT broker for Clojure
 
+image:https://img.shields.io/github/license/dkdhub/clj-mqtt-broker?style=for-the-badge[GitHub]
+image:https://img.shields.io/clojars/v/com.dkdhub/clj-mqtt-broker.svg?style=for-the-badge[]
+image:https://img.shields.io/github/v/tag/dkdhub/clj-mqtt-broker?style=for-the-badge[GitHub tag (latest by date)]
+image:https://img.shields.io/github/last-commit/dkdhub/clj-mqtt-broker?style=for-the-badge[GitHub last commit]
+
 == Rationale
 
-Unfortunately there are few to nothing libraries natively suitable to be used in Clojure development that implement MQTT server side functionalities.
+Unfortunately there are few to nothing libraries, natively suitable to be used in Clojure development that implement MQTT server side functionalities.
 
-The Moquette library is Java MQTT broker based on an eventing model with Netty. The library has a good performance and is desegned with embedding support out of the box. Its configuration is compatible with well known Mosquitto Open Source MQTT server.
+The Moquette library is Java MQTT broker based on an event model by Netty. The library has a good performance and is designed with embedding support available out of the box. Its configuration is compatible with well known Mosquitto Open Source MQTT server.
 
 When being combined - these tools open the way to painless M2M communications for services written in Clojure.
 
-As always we prefer to have things tiny and as simple as possible.
+As always we prefer to keep things as tiny and as simple as it ever possible, so the library interface is very ascetic and pure.
 
 == Compatibility
 
@@ -24,12 +29,56 @@ any other tool that conform MQTT specs should pass too, we believe.
 
 == Usage
 
-The usage pattern is simple:
+Add the following dependency into your `project.clj`'s `:dependecies` section
 
-- define handlers
-- create broker instance
-- start the service
-- start serve messages
+[source, clojure]
+----
+[com.dkdhub/clj-mqtt-broker "0.0.4"]
+----
+
+include the library into your code, like:
+
+[source, clojure]
+----
+(ns my.namespace
+  (:require [clj-mqtt-broker.core :as mqtt-core])
+  (:import (clj_mqtt_broker.core Broker)
+           (com.dkdhub.mqtt_broker SimpleBroker)))
+----
+
+and start coding.
+
+[source, clojure]
+----
+(defrecord BasicHandler [id]
+  InterceptHandler
+  (onPublish [_ msg]
+    (log/info "got a message")
+    (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
+      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+  (getID [_] id)
+  (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
+
+(def config-name "moquette.conf")
+
+(let [b (Broker. (SimpleBroker. config-name))]
+          (with-open [srv (open b (BasicHandler. "12345"))]
+            ;; do what ever your need here upon sending
+            (send srv "MY-SERVER" "/MY_TOPIC" "TEST MESSAGE" 1 false)
+            ;; do what ever you need here after sending
+            ;; once you leave the `with-open` closure - the instance will be stopped automatically
+            ;; once you leave the `let` statement - the instance will be destroyed automatically
+            ))
+----
+
+The usage pattern is clear:
+
+. define handlers
+. create broker instance
+. start the service
+. start serving messages
+
+That is - no complexity and no headaches, at all.
 
 === Defining handlers
 
@@ -48,17 +97,17 @@ The handlers record should implement `InterceptHandler` interface
 
 The full set of method to be overridden:
 
-. onPublish
-. onConnect
-. onDisconnect
-. onConnectionLost
-. onSubscribe
-. onUnsubscribe
-. onMessageAcknowledged
-. getID
-. getInterceptedMessageTypes
+. `onPublish`
+. `onConnect`
+. `onDisconnect`
+. `onConnectionLost`
+. `onSubscribe`
+. `onUnsubscribe`
+. `onMessageAcknowledged`
+. `getID`
+. `getInterceptedMessageTypes`
 
-The `ALL_MESSAGE_TYPES` vector contains the whole bunch of the related messages types.
+The `ALL_MESSAGE_TYPES` vector contains a full set of the related messages types.
 
 === Creating instance
 
@@ -84,6 +133,17 @@ so the instantiation of the complete Broker is looks like:
 (def config-name "my-broker-settings.conf")
 (def srv-java (SimpleBroker. config-name))
 (def srv-clj (Broker. srv-java))
+----
+
+=== Sample configuration
+
+.my-broker-settings.conf
+[source,text]
+----
+port 1883
+host 0.0.0.0
+allow_anonymous true
+telemetry_enabled false
 ----
 
 === Starting the service
@@ -121,8 +181,10 @@ The Clojure interface supports two approaches:
     (comment "Do your stuff here"))
 ----
 
+For more examples see `test` sources.
+
 == License
 
-&copy; 2022 Fern Flower Lab
+&copy; 2022-2023 Fern Flower Lab
 
-Distributed under the MIT License.
+Distributed under the MIT Licence.
