@@ -1,5 +1,6 @@
 (ns clj-mqtt-broker.core
   (:gen-class)
+  (:refer-clojure :exclude [send])
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
            (io.netty.handler.codec.mqtt MqttQoS)
