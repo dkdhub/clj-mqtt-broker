@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class SimpleBroker implements IBroker {
-    final Server mqttBroker = new Server();
+    final Server mqttBroker;
     final IConfig classPathConfig;
 
     private static final Logger LOG = LoggerFactory.getLogger(SimpleBroker.class);
@@ -24,6 +24,7 @@ public class SimpleBroker implements IBroker {
     public SimpleBroker(final String configName) {
         IResourceLoader classpathLoader = new ClasspathResourceLoader();
         classPathConfig = new ResourceLoaderConfig(classpathLoader, configName);
+        mqttBroker = new Server();
     }
 
     @Override

@@ -30,7 +30,7 @@ public class AdvancedBroker implements IBroker {
     }
 
     public void start() throws IOException {
-        m_server.startServer();
+        m_server.startServer(m_config);
         LOG.info("MQTT Broker started with no interceptors enabled");
     }
 

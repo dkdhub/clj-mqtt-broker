@@ -27,7 +27,8 @@
                                         BrokerConstants/HOST_PROPERTY_NAME            (str host)
                                         BrokerConstants/PASSWORD_FILE_PROPERTY_NAME   (str passwords-path)
                                         BrokerConstants/ALLOW_ANONYMOUS_PROPERTY_NAME (str (Boolean/parseBoolean (str anonymous?)))
-                                        BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME (str ws-path)}
+                                        BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME (str ws-path)
+                                        BrokerConstants/ENABLE_TELEMETRY_NAME         (str false)}
 
                                        (and (:persistence-type props) (= :h2 persistence-type))
                                        (assoc BrokerConstants/PERSISTENT_STORE_PROPERTY_NAME BrokerConstants/DEFAULT_PERSISTENT_PATH)
