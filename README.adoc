@@ -33,7 +33,7 @@ Add the following dependency into your `project.clj`'s `:dependecies` section
 
 [source, clojure]
 ----
-[com.dkdhub/clj-mqtt-broker "0.0.4"]
+[com.dkdhub/clj-mqtt-broker "0.0.5"]
 ----
 
 include the library into your code, like:
