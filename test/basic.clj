@@ -92,8 +92,11 @@
         (with-open [srv (open b (BasicHandler. "3456"))]
           (nil? (clients srv)))))
 
-  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
-        (nil? (clients b))))
+  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))
+            clients (clients b)]
+        (and ((complement nil?) clients)
+             (sequential? clients)
+             (empty? clients))))
 
   (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
         (with-open [srv (open b (BasicHandler. "3456"))]
