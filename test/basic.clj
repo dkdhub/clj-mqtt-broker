@@ -80,9 +80,21 @@
 (deftest check-advanced-constructs
   (testing "Checking advanced constructs")
 
+  (log/info "--------- MQTT Advanced Broker empty loop ---------")
   (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
         (with-open [srv (open b (BasicHandler. "3456"))]
           (Thread/sleep 2000)
           (send srv "FROM" "/TEMPERATURE" "TEST" 1 false)
           (Thread/sleep 2000))
-        true)))
+        true))
+
+  (is (let [b (Broker. (SimpleBroker. config-name))]
+        (with-open [srv (open b (BasicHandler. "3456"))]
+          (nil? (clients srv)))))
+
+  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
+        (nil? (clients b))))
+
+  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
+        (with-open [srv (open b (BasicHandler. "3456"))]
+          (sequential? (clients srv))))))

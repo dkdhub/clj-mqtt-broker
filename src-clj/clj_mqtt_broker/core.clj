@@ -4,7 +4,7 @@
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
            (io.netty.handler.codec.mqtt MqttQoS)
-           (com.dkdhub.mqtt_broker IBroker)
+           (com.dkdhub.mqtt_broker AdvancedBroker IBroker)
            (java.util Hashtable Map Properties)))
 
 (defn ->QoS [qos]
@@ -41,7 +41,8 @@
   (open [o ^InterceptHandler handlers])
   (stop [o])
   (close [o])
-  (send [o from to data qos retain?]))
+  (send [o from to data qos retain?])
+  (clients [o]))
 
 (deftype Broker [^IBroker instance]
   CljBroker
@@ -56,4 +57,8 @@
            (if (bytes? data) data (.getBytes ^String data))
            (if (keyword? qos) (->QoS qos) (MqttQoS/valueOf (int qos)))
            (if (boolean? retain?) retain? false))
-    this))
+    this)
+  (clients [_]
+    (if (instance? AdvancedBroker instance)
+      (into [] (.clients instance))
+      nil)))

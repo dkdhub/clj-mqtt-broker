@@ -68,7 +68,7 @@ public class AdvancedBroker implements IBroker {
         m_server.internalPublish(message, from);
     }
 
-    List<Map<String, ? extends Serializable>> clients() {
+    public List<Map<String, ? extends Serializable>> clients() {
         return m_server.listConnectedClients().parallelStream()
                 .map(cl -> Map.of(
                         "id", cl.getClientID(),
