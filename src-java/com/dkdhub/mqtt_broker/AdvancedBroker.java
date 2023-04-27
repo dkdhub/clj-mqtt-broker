@@ -69,11 +69,15 @@ public class AdvancedBroker implements IBroker {
     }
 
     public List<Map<String, ? extends Serializable>> clients() {
-        return m_server.listConnectedClients().parallelStream()
-                .map(cl -> Map.of(
-                        "id", cl.getClientID(),
-                        "address", cl.getAddress(),
-                        "port", cl.getPort()))
-                .collect(Collectors.toUnmodifiableList());
+        try { // FIXME: this `try-catch to be eliminated once fix will be applied in upstream
+            return m_server.listConnectedClients().parallelStream()
+                    .map(cl -> Map.of(
+                            "id", cl.getClientID(),
+                            "address", cl.getAddress(),
+                            "port", cl.getPort()))
+                    .collect(Collectors.toUnmodifiableList());
+        } catch (NullPointerException npe) {
+            return List.of();
+        }
     }
 }
