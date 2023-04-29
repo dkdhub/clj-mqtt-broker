@@ -42,7 +42,8 @@
   (stop [o])
   (close [o])
   (send [o from to data qos retain?])
-  (clients [o]))
+  (clients [o])
+  (disconnect [o ^String client]))
 
 (deftype Broker [^IBroker instance]
   CljBroker
@@ -60,5 +61,9 @@
     this)
   (clients [_]
     (if (instance? AdvancedBroker instance)
-      (into [] (.clients instance))
-      nil)))
+      (map #(->> % (into {}) clojure.walk/keywordize-keys) (.clients instance))
+      nil))
+  (disconnect [_ client]
+    (if (instance? AdvancedBroker instance)
+      (.disconnect instance client)
+      false)))

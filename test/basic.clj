@@ -77,27 +77,77 @@
       (is (= (str (Boolean/parseBoolean "false")) (.getProperty config BrokerConstants/ALLOW_ANONYMOUS_PROPERTY_NAME)))
       (is (= "/" (.getProperty config BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME))))))
 
+(defrecord TraceHandlers [id]
+  InterceptHandler
+  (onPublish [_ msg]
+    (log/info "got a message")
+    (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
+      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+  (onConnect [_ msg]
+    (log/debug "MQTT: client " + (.getClientID msg) + " connected"))
+  (onDisconnect [_ msg]
+    (log/debug "MQTT: client " + (.getClientID msg) + " disconnected"))
+  (onConnectionLost [_ msg]
+    (log/debug "MQTT: client " + (.getClientID msg) + " disconnected (lost)"))
+  (onSubscribe [_ msg]
+    (log/debug "MQTT: subscribed " + (.getClientID msg) + " on " + (.getTopicFilter msg) + " with QoS=" + (.getRequestedQos msg)))
+  (onUnsubscribe [_ msg]
+    (log/debug "MQTT: unsubscribed " + (.getClientID msg) + " from " + (.getTopicFilter msg)))
+  (onMessageAcknowledged [_ msg]
+    (log/debug "MQTT: acknowledged " + (.getMsg msg)))
+  (getID [_] id)
+  (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
+
+(def advanced-config (mqtt-config {:port-tcp 10883 :anonymous? true}))
+
 (deftest check-advanced-constructs
   (testing "Checking advanced constructs")
 
   (log/info "--------- MQTT Advanced Broker empty loop ---------")
-  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
-        (with-open [srv (open b (BasicHandler. "3456"))]
+  (is (let [b (Broker. (AdvancedBroker. advanced-config))]
+        (with-open [srv (open b (TraceHandlers. "3456"))]
           (Thread/sleep 2000)
           (send srv "FROM" "/TEMPERATURE" "TEST" 1 false)
           (Thread/sleep 2000))
         true))
 
+  (log/info "--------- MQTT Advanced Broker check clients listing ---------")
   (is (let [b (Broker. (SimpleBroker. config-name))]
-        (with-open [srv (open b (BasicHandler. "3456"))]
+        (with-open [srv (open b (TraceHandlers. "3456"))]
           (nil? (clients srv)))))
 
-  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))
+  (is (let [b (Broker. (AdvancedBroker. advanced-config))
             clients (clients b)]
         (and ((complement nil?) clients)
              (sequential? clients)
              (empty? clients))))
 
-  (is (let [b (Broker. (AdvancedBroker. (mqtt-config)))]
-        (with-open [srv (open b (BasicHandler. "3456"))]
+  (is (let [b (Broker. (AdvancedBroker. advanced-config))]
+        (with-open [srv (open b (TraceHandlers. "3456"))]
           (sequential? (clients srv))))))
+
+(deftest check-advanced-disconnects
+  (testing "Checking advanced client for disconnects")
+  (log/info "--------- MQTT Advanced Broker check disconnect ---------")
+  (is (let [b (Broker. (AdvancedBroker. advanced-config))
+            results (atom [])]
+        (start b (TraceHandlers. "3456"))
+
+        (println "======> MQTT Advanced Broker wait .........")
+        (Thread/sleep 10000)
+        (println "======> MQTT Clients:" (clients b))
+        (println "======> MQTT Advanced Broker disconnecting .........")
+
+        (doseq [client (clients b)
+              :let [client-id (:id client)]
+              :when client-id]
+          (swap! results conj (disconnect b client-id)))
+
+        (println "======> MQTT Advanced Broker goes down .........")
+        (println "======> MQTT Clients:" (clients b))
+        (Thread/sleep 1000)
+
+        (stop b)
+        (println "======> MQTT Results:" @results)
+        (or (empty? @results)
+            (every? true? @results)))))

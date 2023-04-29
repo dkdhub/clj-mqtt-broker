@@ -80,4 +80,11 @@ public class AdvancedBroker implements IBroker {
             return List.of();
         }
     }
+
+    public boolean disconnect(String client) {
+        LOG.debug("Will disconnect client {}", client);
+        boolean res = m_server.disconnectClient(client);
+        LOG.debug("Disconnect result: {}", res);
+        return res;
+    }
 }
