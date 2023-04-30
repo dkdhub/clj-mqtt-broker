@@ -32,7 +32,7 @@
                                         BrokerConstants/PERSISTENCE_ENABLED_PROPERTY_NAME (str false)}
 
                                        (and (:persistence-type props) (= :h2 persistence-type))
-                                       (assoc BrokerConstants/DATA_PATH_PROPERTY_NAME BrokerConstants/DEFAULT_PERSISTENT_PATH
+                                       (assoc BrokerConstants/DATA_PATH_PROPERTY_NAME "mqtt-data"
                                               BrokerConstants/PERSISTENCE_ENABLED_PROPERTY_NAME (str true)
                                               BrokerConstants/PERSISTENT_QUEUE_TYPE_PROPERTY_NAME "h2")
 

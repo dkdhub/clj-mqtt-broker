@@ -1,11 +1,13 @@
 (ns basic
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [clj-mqtt-broker.core :refer :all]
             [clojure.tools.logging :as log])
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
            (io.netty.handler.codec.mqtt MqttQoS)
            (com.dkdhub.mqtt_broker AdvancedBroker SimpleBroker)
+           (java.io File)
            (java.nio.charset StandardCharsets)
            (clj_mqtt_broker.core Broker)
            (java.util Properties)))
@@ -139,8 +141,8 @@
         (println "======> MQTT Advanced Broker disconnecting .........")
 
         (doseq [client (clients b)
-              :let [client-id (:id client)]
-              :when client-id]
+                :let [client-id (:id client)]
+                :when client-id]
           (swap! results conj (disconnect b client-id)))
 
         (println "======> MQTT Advanced Broker goes down .........")
@@ -157,3 +159,22 @@
 
   (is (nil? (clients (create-broker config-name))))
   (is (sequential? (clients (create-broker advanced-config)))))
+
+(deftest check-persistence
+  (testing "Checking H2 persistence")
+
+  (is (let [config (mqtt-config {:port-tcp         10883
+                                 :anonymous?       true
+                                 :persistence-type :h2})
+            b (create-broker config)
+            data-name (get config BrokerConstants/DATA_PATH_PROPERTY_NAME)
+            data-dir (str (System/getProperty "user.dir") (File/separator) data-name)
+            h2-path (str data-dir (File/separator)
+                         BrokerConstants/DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME)]
+        (println "======> MQTT data path:" data-dir)
+        (println "======> MQTT persistence:" h2-path)
+        (start b (TraceHandlers. "3456"))
+        (Thread/sleep 10000)
+        (stop b)
+        (and (.isDirectory (io/file data-dir))
+             (.exists (io/file h2-path))))))
