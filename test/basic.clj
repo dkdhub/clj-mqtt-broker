@@ -151,3 +151,9 @@
         (println "======> MQTT Results:" @results)
         (or (empty? @results)
             (every? true? @results)))))
+
+(deftest check-multimethod-create
+  (testing "Checking multimethod constructor")
+
+  (is (nil? (clients (create-broker config-name))))
+  (is (sequential? (clients (create-broker advanced-config)))))

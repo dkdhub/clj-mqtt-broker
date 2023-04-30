@@ -4,7 +4,7 @@
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
            (io.netty.handler.codec.mqtt MqttQoS)
-           (com.dkdhub.mqtt_broker AdvancedBroker IBroker)
+           (com.dkdhub.mqtt_broker AdvancedBroker IBroker SimpleBroker)
            (java.util Hashtable Map Properties)))
 
 (defn ->QoS [qos]
@@ -67,3 +67,11 @@
     (if (instance? AdvancedBroker instance)
       (.disconnect instance client)
       false)))
+
+(defmulti create-broker (fn [x] (class x)))
+
+(defmethod create-broker String [config]
+  (Broker. (SimpleBroker. config)))
+
+(defmethod create-broker Properties [config]
+  (Broker. (AdvancedBroker. config)))

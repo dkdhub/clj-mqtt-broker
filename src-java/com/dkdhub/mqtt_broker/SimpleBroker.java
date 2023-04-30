@@ -22,6 +22,7 @@ public class SimpleBroker implements IBroker {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleBroker.class);
 
     public SimpleBroker(final String configName) {
+        LOG.info("Constructing MQTT Broker with configuration {}", configName);
         IResourceLoader classpathLoader = new ClasspathResourceLoader();
         classPathConfig = new ResourceLoaderConfig(classpathLoader, configName);
         mqttBroker = new Server();
