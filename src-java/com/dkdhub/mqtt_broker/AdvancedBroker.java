@@ -69,14 +69,22 @@ public class AdvancedBroker implements IBroker {
     }
 
     public List<Map<String, ? extends Serializable>> clients() {
-        try { // FIXME: this `try-catch to be eliminated once fix will be applied in upstream
+        try {
             return m_server.listConnectedClients().parallelStream()
                     .map(cl -> Map.of(
                             "id", cl.getClientID(),
                             "address", cl.getAddress(),
                             "port", cl.getPort()))
                     .collect(Collectors.toUnmodifiableList());
+        } catch (IllegalStateException ise) {
+            LOG.warn(ise.getLocalizedMessage());
+            return null;
         } catch (NullPointerException npe) {
+            // This actually should not happen. Since this is not the !initialized case,
+            // let's suppose that server is actually running, so the error emitted from
+            // one of the elements during the execution. Such a case is unclear, so consider
+            // clients list is unavailable, so []
+            LOG.error(npe.getLocalizedMessage());
             return List.of();
         }
     }
