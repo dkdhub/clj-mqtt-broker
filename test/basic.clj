@@ -130,7 +130,7 @@
 
 (deftest check-advanced-disconnects
   (testing "Checking advanced client for disconnects")
-  (log/info "--------- MQTT Advanced Broker check disconnect ---------")
+  (log/info "--------- MQTT Advanced Broker check disconnect (keep state) ---------")
   (is (let [b (Broker. (AdvancedBroker. advanced-config))
             results (atom [])]
         (start b (TraceHandlers. "3456"))
@@ -144,6 +144,34 @@
                 :let [client-id (:id client)]
                 :when client-id]
           (swap! results conj (disconnect b client-id)))
+
+        ;; TODO: add here check state test part
+
+        (println "======> MQTT Advanced Broker goes down .........")
+        (println "======> MQTT Clients:" (clients b))
+        (Thread/sleep 1000)
+
+        (stop b)
+        (println "======> MQTT Results:" @results)
+        (or (empty? @results)
+            (every? true? @results))))
+
+  (log/info "--------- MQTT Advanced Broker check disconnect (state flush) ---------")
+  (is (let [b (Broker. (AdvancedBroker. advanced-config))
+            results (atom [])]
+        (start b (TraceHandlers. "3456"))
+
+        (println "======> MQTT Advanced Broker wait .........")
+        (Thread/sleep 10000)
+        (println "======> MQTT Clients:" (clients b))
+        (println "======> MQTT Advanced Broker disconnecting .........")
+
+        (doseq [client (clients b)
+                :let [client-id (:id client)]
+                :when client-id]
+          (swap! results conj (disconnect b client-id true)))
+
+        ;; TODO: add here check state test part
 
         (println "======> MQTT Advanced Broker goes down .........")
         (println "======> MQTT Clients:" (clients b))

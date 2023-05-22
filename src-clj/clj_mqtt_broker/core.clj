@@ -46,7 +46,9 @@
   (close [o])
   (send [o from to data qos retain?])
   (clients [o])
-  (disconnect [o ^String client]))
+  (disconnect
+    [o ^String client]
+    [o ^String client ^Boolean flush?]))
 
 (deftype Broker [^IBroker instance]
   CljBroker
@@ -66,9 +68,10 @@
     (if (instance? AdvancedBroker instance)
       (map #(->> % (into {}) clojure.walk/keywordize-keys) (.clients instance))
       nil))
-  (disconnect [_ client]
+  (disconnect [_ client] (disconnect _ client false))
+  (disconnect [_ client flush?]
     (if (instance? AdvancedBroker instance)
-      (.disconnect instance client)
+      (.disconnect instance client (boolean flush?))
       false)))
 
 (defmulti create-broker (fn [x] (class x)))
