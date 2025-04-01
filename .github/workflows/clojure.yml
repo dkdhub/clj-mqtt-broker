@@ -6,14 +6,30 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'maven'
+        
     - name: Install dependencies
       run: lein deps
+      
     - name: Run tests
       run: lein test
+      
+    - name: Check for outdated dependencies
+      run: |
+        lein ancient check :all
+        lein ancient check-profiles
