@@ -18,6 +18,14 @@
     (log/info "got a message")
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
       (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
+  (onConnect [_ _msg])
+  (onDisconnect [_ _msg])
+  (onConnectionLost [_ _msg])
+  (onSubscribe [_ _msg])
+  (onUnsubscribe [_ _msg])
+  (onMessageAcknowledged [_ _msg])
+  (onSessionLoopError [_ error]
+    (log/error error "Session loop error"))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 
@@ -97,6 +105,8 @@
     (log/debug (str "MQTT: unsubscribed " (.getClientID msg) " from " (.getTopicFilter msg))))
   (onMessageAcknowledged [_ msg]
     (log/debug (str "MQTT: acknowledged " (.getMsg msg))))
+  (onSessionLoopError [_ error]
+    (log/error error "Session loop error"))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 

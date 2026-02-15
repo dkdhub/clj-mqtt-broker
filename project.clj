@@ -3,7 +3,7 @@
   :url "https://github.com/dkdhub/clj-mqtt-broker"
   :license {:name "Built In Project License"}
   :repositories [["jitpack" "https://jitpack.io"]]
-  :dependencies [[com.github.moquette-io/moquette "0.18.0"
+  :dependencies [[com.github.moquette-io.moquette/moquette-broker "0.18.0"
                   :exclusions [com.bugsnag/bugsnag
                                org.slf4j/slf4j-api
                                org.slf4j/slf4j-log4j12]]])

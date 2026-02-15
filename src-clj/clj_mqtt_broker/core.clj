@@ -19,8 +19,10 @@
 (defn mqtt-config ^Properties
   ([] (mqtt-config nil))
   ([{:keys [port-tcp port-ws host passwords-path anonymous? ws-path
-            persistence-type message-size]
-     :or   {port-tcp "disabled" port-ws "disabled" host "0.0.0.0" passwords-path "" anonymous? false ws-path "/"}
+            persistence-type data-path message-size
+            allow-zero-byte-client-id? buffer-flush-ms netty-native?]
+     :or   {port-tcp "disabled" port-ws "disabled" host "0.0.0.0" passwords-path "" anonymous? false ws-path "/"
+            data-path "mqtt-data"}
      :as   props}]
    (doto (Properties.)
      (.putAll (Hashtable. ^Map (cond-> {BrokerConstants/PORT_PROPERTY_NAME                (str port-tcp)
@@ -32,13 +34,24 @@
                                         BrokerConstants/ENABLE_TELEMETRY_NAME             (str false)
                                         BrokerConstants/PERSISTENCE_ENABLED_PROPERTY_NAME (str false)}
 
-                                       (and (:persistence-type props) (= :h2 persistence-type))
-                                       (assoc BrokerConstants/DATA_PATH_PROPERTY_NAME "mqtt-data"
+                                       (and (:persistence-type props) (#{:h2 :segmented} persistence-type))
+                                       (assoc BrokerConstants/DATA_PATH_PROPERTY_NAME (str data-path)
                                               BrokerConstants/PERSISTENCE_ENABLED_PROPERTY_NAME (str true)
-                                              BrokerConstants/PERSISTENT_QUEUE_TYPE_PROPERTY_NAME "h2")
+                                              BrokerConstants/PERSISTENT_QUEUE_TYPE_PROPERTY_NAME (name persistence-type))
 
                                        (:message-size props)
-                                       (assoc BrokerConstants/NETTY_MAX_BYTES_PROPERTY_NAME (str message-size))))))))
+                                       (assoc BrokerConstants/NETTY_MAX_BYTES_PROPERTY_NAME (str message-size))
+
+                                       (some? (:allow-zero-byte-client-id? props))
+                                       (assoc BrokerConstants/ALLOW_ZERO_BYTE_CLIENT_ID_PROPERTY_NAME
+                                              (str (boolean allow-zero-byte-client-id?)))
+
+                                       (:buffer-flush-ms props)
+                                       (assoc BrokerConstants/BUFFER_FLUSH_MS_PROPERTY_NAME (str buffer-flush-ms))
+
+                                       (some? (:netty-native? props))
+                                       (assoc BrokerConstants/NETTY_NATIVE_PROPERTY_NAME
+                                              (str (boolean netty-native?)))))))))
 
 (defprotocol CljBroker
   (start [o ^InterceptHandler handlers])
