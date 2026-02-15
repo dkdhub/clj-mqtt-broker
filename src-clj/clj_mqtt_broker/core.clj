@@ -1,6 +1,7 @@
 (ns clj-mqtt-broker.core
   (:gen-class)
   (:refer-clojure :exclude [send])
+  (:require [clojure.walk])
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
            (io.netty.handler.codec.mqtt MqttQoS)
@@ -51,6 +52,8 @@
     [o ^String client ^Boolean flush?]))
 
 (deftype Broker [^IBroker instance]
+  java.io.Closeable
+
   CljBroker
   (start [this handlers] (.start ^IBroker instance handlers) this)
   (open [this handlers] (.start ^IBroker instance handlers) this)
@@ -68,7 +71,7 @@
     (if (instance? AdvancedBroker instance)
       (map #(->> % (into {}) clojure.walk/keywordize-keys) (.clients instance))
       nil))
-  (disconnect [_ client] (disconnect _ client false))
+  (disconnect [this client] (disconnect this client false))
   (disconnect [_ client flush?]
     (if (instance? AdvancedBroker instance)
       (.disconnect instance client (boolean flush?))

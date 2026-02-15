@@ -93,7 +93,7 @@ public class AdvancedBroker implements IBroker {
         if (client == null) return false;
 
         LOG.debug("Will disconnect client {}, flush state: {}", client, flush);
-        boolean res = flush ? m_server.disconnectClient(client) : m_server.disconnectAndPurgeClientState(client);
+        boolean res = flush ? m_server.disconnectAndPurgeClientState(client) : m_server.disconnectClient(client);
         LOG.debug("Disconnect result: {}", res);
         return res;
     }

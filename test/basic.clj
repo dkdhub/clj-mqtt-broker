@@ -17,7 +17,7 @@
   (onPublish [_ msg]
     (log/info "got a message")
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
-      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+      (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 
@@ -84,125 +84,123 @@
   (onPublish [_ msg]
     (log/info "got a message")
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
-      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+      (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
   (onConnect [_ msg]
-    (log/debug "MQTT: client " + (.getClientID msg) + " connected"))
+    (log/debug (str "MQTT: client " (.getClientID msg) " connected")))
   (onDisconnect [_ msg]
-    (log/debug "MQTT: client " + (.getClientID msg) + " disconnected"))
+    (log/debug (str "MQTT: client " (.getClientID msg) " disconnected")))
   (onConnectionLost [_ msg]
-    (log/debug "MQTT: client " + (.getClientID msg) + " disconnected (lost)"))
+    (log/debug (str "MQTT: client " (.getClientID msg) " disconnected (lost)")))
   (onSubscribe [_ msg]
-    (log/debug "MQTT: subscribed " + (.getClientID msg) + " on " + (.getTopicFilter msg) + " with QoS=" + (.getRequestedQos msg)))
+    (log/debug (str "MQTT: subscribed " (.getClientID msg) " on " (.getTopicFilter msg) " with QoS=" (.getRequestedQos msg))))
   (onUnsubscribe [_ msg]
-    (log/debug "MQTT: unsubscribed " + (.getClientID msg) + " from " + (.getTopicFilter msg)))
+    (log/debug (str "MQTT: unsubscribed " (.getClientID msg) " from " (.getTopicFilter msg))))
   (onMessageAcknowledged [_ msg]
-    (log/debug "MQTT: acknowledged " + (.getMsg msg)))
+    (log/debug (str "MQTT: acknowledged " (.getMsg msg))))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 
 (def advanced-config (mqtt-config {:port-tcp 10883 :anonymous? true}))
 
 (deftest check-advanced-constructs
-  (testing "Checking advanced constructs")
+  (testing "Checking advanced constructs"
 
-  (log/info "--------- MQTT Advanced Broker empty loop ---------")
-  (is (let [b (Broker. (AdvancedBroker. advanced-config))]
-        (with-open [srv (open b (TraceHandlers. "3456"))]
-          (Thread/sleep 2000)
-          (send srv "FROM" "/TEMPERATURE" "TEST" 1 false)
-          (Thread/sleep 2000))
-        true))
+    (log/info "--------- MQTT Advanced Broker empty loop ---------")
+    (is (let [b (Broker. (AdvancedBroker. advanced-config))]
+          (with-open [srv (open b (TraceHandlers. "3456"))]
+            (Thread/sleep 2000)
+            (send srv "FROM" "/TEMPERATURE" "TEST" 1 false)
+            (Thread/sleep 2000))
+          true))
 
-  (log/info "--------- MQTT Advanced Broker check clients listing ---------")
-  (is (let [b (Broker. (SimpleBroker. config-name))]
-        (with-open [srv (open b (TraceHandlers. "3456"))]
-          (nil? (clients srv)))))
+    (log/info "--------- MQTT Advanced Broker check clients listing ---------")
+    (is (let [b (Broker. (SimpleBroker. config-name))]
+          (with-open [srv (open b (TraceHandlers. "3456"))]
+            (nil? (clients srv)))))
 
-  (is (let [b (Broker. (AdvancedBroker. advanced-config))
-            clients (clients b)]
-        (and ((complement nil?) clients)
-             (sequential? clients)
-             (empty? clients))))
+    (is (let [b (Broker. (AdvancedBroker. advanced-config))
+              clients (clients b)]
+          (and ((complement nil?) clients)
+               (sequential? clients)
+               (empty? clients))))
 
-  (is (let [b (Broker. (AdvancedBroker. advanced-config))]
-        (with-open [srv (open b (TraceHandlers. "3456"))]
-          (sequential? (clients srv))))))
+    (is (let [b (Broker. (AdvancedBroker. advanced-config))]
+          (with-open [srv (open b (TraceHandlers. "3456"))]
+            (sequential? (clients srv)))))))
 
 (deftest check-advanced-disconnects
-  (testing "Checking advanced client for disconnects")
-  (log/info "--------- MQTT Advanced Broker check disconnect (keep state) ---------")
-  (is (let [b (Broker. (AdvancedBroker. advanced-config))
-            results (atom [])]
-        (start b (TraceHandlers. "3456"))
+  (testing "Checking advanced client for disconnects"
+    (log/info "--------- MQTT Advanced Broker check disconnect (keep state) ---------")
+    (is (let [b (Broker. (AdvancedBroker. advanced-config))
+              results (atom [])]
+          (start b (TraceHandlers. "3456"))
 
-        (println "======> MQTT Advanced Broker wait .........")
-        (Thread/sleep 10000)
-        (println "======> MQTT Clients:" (clients b))
-        (println "======> MQTT Advanced Broker disconnecting .........")
+          (println "======> MQTT Advanced Broker wait .........")
+          (Thread/sleep 10000)
+          (println "======> MQTT Clients:" (clients b))
+          (println "======> MQTT Advanced Broker disconnecting .........")
 
-        (doseq [client (clients b)
-                :let [client-id (:id client)]
-                :when client-id]
-          (swap! results conj (disconnect b client-id)))
+          (doseq [client (clients b)
+                  :let [client-id (:id client)]
+                  :when client-id]
+            (swap! results conj (disconnect b client-id)))
 
-        ;; TODO: add here check state test part
+          ;; TODO: add here check state test part
 
-        (println "======> MQTT Advanced Broker goes down .........")
-        (println "======> MQTT Clients:" (clients b))
-        (Thread/sleep 1000)
+          (println "======> MQTT Advanced Broker goes down .........")
+          (println "======> MQTT Clients:" (clients b))
+          (Thread/sleep 1000)
 
-        (stop b)
-        (println "======> MQTT Results:" @results)
-        (or (empty? @results)
-            (every? true? @results))))
+          (stop b)
+          (println "======> MQTT Results:" @results)
+          (or (empty? @results)
+              (every? true? @results))))
 
-  (log/info "--------- MQTT Advanced Broker check disconnect (state flush) ---------")
-  (is (let [b (Broker. (AdvancedBroker. advanced-config))
-            results (atom [])]
-        (start b (TraceHandlers. "3456"))
+    (log/info "--------- MQTT Advanced Broker check disconnect (state flush) ---------")
+    (is (let [b (Broker. (AdvancedBroker. advanced-config))
+              results (atom [])]
+          (start b (TraceHandlers. "3456"))
 
-        (println "======> MQTT Advanced Broker wait .........")
-        (Thread/sleep 10000)
-        (println "======> MQTT Clients:" (clients b))
-        (println "======> MQTT Advanced Broker disconnecting .........")
+          (println "======> MQTT Advanced Broker wait .........")
+          (Thread/sleep 10000)
+          (println "======> MQTT Clients:" (clients b))
+          (println "======> MQTT Advanced Broker disconnecting .........")
 
-        (doseq [client (clients b)
-                :let [client-id (:id client)]
-                :when client-id]
-          (swap! results conj (disconnect b client-id true)))
+          (doseq [client (clients b)
+                  :let [client-id (:id client)]
+                  :when client-id]
+            (swap! results conj (disconnect b client-id true)))
 
-        ;; TODO: add here check state test part
+          ;; TODO: add here check state test part
 
-        (println "======> MQTT Advanced Broker goes down .........")
-        (println "======> MQTT Clients:" (clients b))
-        (Thread/sleep 1000)
+          (println "======> MQTT Advanced Broker goes down .........")
+          (println "======> MQTT Clients:" (clients b))
+          (Thread/sleep 1000)
 
-        (stop b)
-        (println "======> MQTT Results:" @results)
-        (or (empty? @results)
-            (every? true? @results)))))
+          (stop b)
+          (println "======> MQTT Results:" @results)
+          (or (empty? @results)
+              (every? true? @results))))))
 
 (deftest check-multimethod-create
-  (testing "Checking multimethod constructor")
-
-  (is (nil? (clients (create-broker config-name))))
-  (is (sequential? (clients (create-broker advanced-config)))))
+  (testing "Checking multimethod constructor"
+    (is (nil? (clients (create-broker config-name))))
+    (is (sequential? (clients (create-broker advanced-config))))))
 
 (deftest check-persistence
-  (testing "Checking H2 persistence")
-
-  (is (let [config (mqtt-config {:port-tcp         10883
-                                 :anonymous?       true
-                                 :persistence-type :h2})
-            b (create-broker config)
-            data-name (get config BrokerConstants/DATA_PATH_PROPERTY_NAME)
-            data-dir (str (System/getProperty "user.dir") (File/separator) data-name)
-            h2-path (str data-dir (File/separator)
-                         BrokerConstants/DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME)]
-        (println "======> MQTT data path:" data-dir)
-        (println "======> MQTT persistence:" h2-path)
-        (start b (TraceHandlers. "3456"))
-        (Thread/sleep 10000)
-        (stop b)
-        (and (.isDirectory (io/file data-dir))
-             (.exists (io/file h2-path))))))
+  (testing "Checking H2 persistence"
+    (is (let [config (mqtt-config {:port-tcp         10883
+                                   :anonymous?       true
+                                   :persistence-type :h2})
+              b (create-broker config)
+              data-name (get config BrokerConstants/DATA_PATH_PROPERTY_NAME)
+              data-dir (str (System/getProperty "user.dir") (File/separator) data-name)
+              h2-path (str data-dir (File/separator)
+                           BrokerConstants/DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME)]
+          (println "======> MQTT data path:" data-dir)
+          (println "======> MQTT persistence:" h2-path)
+          (start b (TraceHandlers. "3456"))
+          (Thread/sleep 10000)
+          (stop b)
+          (and (.isDirectory (io/file data-dir))
+               (.exists (io/file h2-path)))))))

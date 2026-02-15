@@ -55,7 +55,7 @@ and start coding.
   (onPublish [_ msg]
     (log/info "got a message")
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
-      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+      (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 
@@ -90,7 +90,7 @@ The handlers record should implement `InterceptHandler` interface
   InterceptHandler
   (onPublish [_ msg]
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
-      (log/info "Received on topic: " + (.getTopicName msg) + " content: " + payload)))
+      (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 ----
