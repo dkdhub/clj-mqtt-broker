@@ -33,7 +33,7 @@ Add the following dependency into your `project.clj`'s `:dependecies` section
 
 [source, clojure]
 ----
-[com.dkdhub/clj-mqtt-broker "0.0.7-SNAPSHOT"]
+[com.dkdhub/clj-mqtt-broker "0.0.8"]
 ----
 
 include the library into your code, like:
@@ -56,6 +56,13 @@ and start coding.
     (log/info "got a message")
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
       (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
+  (onConnect [_ _msg])
+  (onDisconnect [_ _msg])
+  (onConnectionLost [_ _msg])
+  (onSubscribe [_ _msg])
+  (onUnsubscribe [_ _msg])
+  (onMessageAcknowledged [_ _msg])
+  (onSessionLoopError [_ _error])
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 
@@ -91,11 +98,18 @@ The handlers record should implement `InterceptHandler` interface
   (onPublish [_ msg]
     (let [payload (-> msg .getPayload (.toString StandardCharsets/UTF_8))]
       (log/info (str "Received on topic: " (.getTopicName msg) " content: " payload))))
+  (onConnect [_ _msg])
+  (onDisconnect [_ _msg])
+  (onConnectionLost [_ _msg])
+  (onSubscribe [_ _msg])
+  (onUnsubscribe [_ _msg])
+  (onMessageAcknowledged [_ _msg])
+  (onSessionLoopError [_ _error])
   (getID [_] id)
   (getInterceptedMessageTypes [_] InterceptHandler/ALL_MESSAGE_TYPES))
 ----
 
-The full set of method to be overridden:
+The full set of methods to be overridden:
 
 . `onPublish`
 . `onConnect`
@@ -104,6 +118,7 @@ The full set of method to be overridden:
 . `onSubscribe`
 . `onUnsubscribe`
 . `onMessageAcknowledged`
+. `onSessionLoopError`
 . `getID`
 . `getInterceptedMessageTypes`
 
@@ -123,7 +138,9 @@ In order to manage the instance comfortably it should be passed as a parameter i
   (open [o ^InterceptHandler handlers])
   (stop [o])
   (close [o])
-  (send [o from to data qos retain?]))
+  (send [o from to data qos retain?])
+  (clients [o])
+  (disconnect [o client] [o client flush?]))
 ----
 
 so the instantiation of the complete Broker is looks like:
@@ -183,8 +200,45 @@ The Clojure interface supports two approaches:
 
 For more examples see `test` sources.
 
+=== Advanced Broker with programmatic config
+
+For more control, use `AdvancedBroker` with `mqtt-config`:
+
+[source, clojure]
+----
+(ns my.namespace
+  (:require [clj-mqtt-broker.core :as mqtt])
+  (:import (clj_mqtt_broker.core Broker)
+           (com.dkdhub.mqtt_broker AdvancedBroker)))
+
+(def config (mqtt/mqtt-config {:port-tcp 1883 :anonymous? true}))
+
+(with-open [srv (mqtt/open (Broker. (AdvancedBroker. config))
+                           (BasicHandler. "my-handler"))]
+  (mqtt/send srv "MY-SERVER" "/TOPIC" "payload" :exactly false))
+----
+
+.mqtt-config options
+[cols="1,1,2"]
+|===
+| Key | Default | Description
+
+| `:port-tcp` | `"disabled"` | TCP port for MQTT
+| `:port-ws` | `"disabled"` | WebSocket port
+| `:host` | `"0.0.0.0"` | Bind address
+| `:passwords-path` | `""` | Path to password file
+| `:anonymous?` | `false` | Allow anonymous connections
+| `:ws-path` | `"/"` | WebSocket path
+| `:persistence-type` | none | `:h2` or `:segmented`
+| `:data-path` | `"mqtt-data"` | Persistence data directory
+| `:message-size` | `8092` | Max MQTT message size in bytes
+| `:allow-zero-byte-client-id?` | none | Allow MQTT5 zero-byte client IDs
+| `:buffer-flush-ms` | none | Buffer flush interval in milliseconds
+| `:netty-native?` | none | Use native transport (kqueue/epoll)
+|===
+
 == License
 
-&copy; 2022-2023 Fern Flower Lab
+&copy; 2022-2025 Fern Flower Lab
 
 Distributed under the MIT Licence.
