@@ -5,6 +5,7 @@
             [clojure.tools.logging :as log])
   (:import (io.moquette.interception InterceptHandler)
            (io.moquette BrokerConstants)
+           (io.moquette.broker.config IConfig)
            (io.netty.handler.codec.mqtt MqttQoS)
            (com.dkdhub.mqtt_broker AdvancedBroker SimpleBroker)
            (java.io File)
@@ -70,7 +71,7 @@
 
     (log/info "--------- MQTT config definitions ---------")
     (log/info "  the default message size is:" default-message-size-bytes)
-    (is (= default-message-size-bytes BrokerConstants/DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE)
+    (is (= default-message-size-bytes IConfig/DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE)
         "The max size defined and a default for MQTT messages is differs from Broker's constants!")
 
     (log/info "  the default QoS is" MqttQoS/EXACTLY_ONCE)
@@ -78,14 +79,14 @@
 
     (log/info "--------- MQTT config creation ---------")
     (log/info "  the defaults for AdvancedBroker are:" (mqtt-config))
-    (let [config (mqtt-config)]
+    (let [^Properties config (mqtt-config)]
       (is (instance? Properties config) "Generated config is not a Property class instance")
-      (is (= "disabled" (.getProperty config BrokerConstants/PORT_PROPERTY_NAME)))
-      (is (= "disabled" (.getProperty config BrokerConstants/WEB_SOCKET_PORT_PROPERTY_NAME)))
-      (is (= "0.0.0.0" (.getProperty config BrokerConstants/HOST_PROPERTY_NAME)))
-      (is (empty? (.getProperty config BrokerConstants/PASSWORD_FILE_PROPERTY_NAME)))
-      (is (= (str (Boolean/parseBoolean "false")) (.getProperty config BrokerConstants/ALLOW_ANONYMOUS_PROPERTY_NAME)))
-      (is (= "/" (.getProperty config BrokerConstants/WEB_SOCKET_PATH_PROPERTY_NAME))))))
+      (is (= "disabled" (.getProperty config IConfig/PORT_PROPERTY_NAME)))
+      (is (= "disabled" (.getProperty config IConfig/WEB_SOCKET_PORT_PROPERTY_NAME)))
+      (is (= "0.0.0.0" (.getProperty config IConfig/HOST_PROPERTY_NAME)))
+      (is (empty? (.getProperty config IConfig/PASSWORD_FILE_PROPERTY_NAME)))
+      (is (= (str (Boolean/parseBoolean "false")) (.getProperty config IConfig/ALLOW_ANONYMOUS_PROPERTY_NAME)))
+      (is (= "/" (.getProperty config IConfig/WEB_SOCKET_PATH_PROPERTY_NAME))))))
 
 (defrecord TraceHandlers [id]
   InterceptHandler
@@ -203,7 +204,7 @@
                                    :anonymous?       true
                                    :persistence-type :h2})
               b (create-broker config)
-              data-name (get config BrokerConstants/DATA_PATH_PROPERTY_NAME)
+              data-name (get config IConfig/DATA_PATH_PROPERTY_NAME)
               data-dir (str (System/getProperty "user.dir") (File/separator) data-name)
               h2-path (str data-dir (File/separator)
                            BrokerConstants/DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME)]

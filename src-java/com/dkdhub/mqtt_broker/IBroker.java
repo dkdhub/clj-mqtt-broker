@@ -7,6 +7,8 @@ import java.io.IOException;
 
 public interface IBroker {
     void start(InterceptHandler handler) throws IOException;
+
     void stop();
+
     void send(String from, String topic, byte[] data, MqttQoS qos, Boolean retained);
 }
